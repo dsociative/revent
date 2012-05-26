@@ -1,24 +1,24 @@
 # coding: utf8
 
+from reactor import Reactor
+from signal import SIGINT
 import pyev
 import threading
-from signal import SIGINT
 
 
-class TickerThread(threading.Thread):
-    ''' Нить с тикалкой '''
+class RThread(threading.Thread):
 
-    def __init__(self, func):
+    def __init__(self, mapper={}):
         super(TickerThread, self).__init__()
-        self.func = func
         self.loop = pyev.default_loop()
+        self.reactor = Reactor(mapper)
 
     def run(self):
         def stopper_cb(watcher, events):
             watcher.loop.stop()
 
         def timer_cb(watcher, events):
-            self.func()
+            self.reactor.calc()
 
         timer = pyev.Timer(0, 1, self.loop, timer_cb, 0)
         timer.start()
