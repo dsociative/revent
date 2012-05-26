@@ -52,10 +52,16 @@ class ReactorDB(RModelStore):
 
 class Reactor(object):
 
-    def __init__(self, event_mapper={}):
+    def __init__(self, events):
         self.db = ReactorDB()
-        self.mapper = event_mapper
+        self.mapper = dict(self.mapper_gen(events))
         self.timeline = SortedDict()
+
+        self.load()
+
+    def mapper_gen(self, events):
+        for event in events:
+            yield event.type, event
 
     def load(self):
         for time, event_queue in self.db.event_models:

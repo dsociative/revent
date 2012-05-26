@@ -8,7 +8,6 @@ from unittest.case import TestCase
 class TEevent(Event):
 
     done = False
-    type = 'tevent'
 
     def do(self, reactor, time):
         self.done = True
@@ -16,8 +15,6 @@ class TEevent(Event):
 
 
 class EventWithArgs(Event):
-
-    type = 'event_with_args'
 
     def init(self, x, y):
         self.x = x
@@ -27,7 +24,7 @@ class EventWithArgs(Event):
 class ReactorTest(TestCase):
 
     def setUp(self):
-        self.reactor = Reactor()
+        self.reactor = Reactor([])
         self.reactor.db.remove()
 
     def test_(self):
@@ -57,7 +54,7 @@ class ReactorTest(TestCase):
         self.assertEqual(self.reactor.get(event_time2), [])
 
     def test_save_load(self):
-        self.reactor.mapper['event_with_args'] = EventWithArgs
+        self.reactor.mapper['EventWithArgs'] = EventWithArgs
         event_time = itime() + 30
         event = EventWithArgs(x=10, y=15)
         self.reactor.append(event, 30)

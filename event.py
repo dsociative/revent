@@ -7,6 +7,10 @@ class Event(object):
         self.params = kw
         self.init(**kw)
 
+    @property
+    def type(self):
+        return self.__class__.__name__
+
     def init(self, **kw):
         ''' override '''
 
