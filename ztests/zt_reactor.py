@@ -3,18 +3,17 @@ from event import Event
 from reactor import Reactor, itime
 from sorteddict import SortedDict
 from unittest.case import TestCase
-import time
 
 
 class TEevent(Event):
 
     done = False
-
     type = 'tevent'
 
     def do(self, reactor, time):
         self.done = True
         return
+
 
 class EventWithArgs(Event):
 
@@ -65,8 +64,8 @@ class ReactorTest(TestCase):
         self.reactor.append(event, 30)
 
         event_db = self.reactor.db.get(event_time).get(1)
-        self.assertEqual(event_db.type, event.type)
-        self.assertEqual(event_db.params, event.params)
+        self.assertEqual(event_db.type.get(), event.type)
+        self.assertEqual(event_db.params.get(), event.params)
 
         self.reactor.timeline = SortedDict()
         self.reactor.load()

@@ -1,15 +1,18 @@
 # coding: utf8
-from model.rmodel import RModel
-from model.rmodel_store import RModelStore
-from model.fields.rfield import rfield
+from fields.rfield import rfield
+from rmodel import RModel
+from rmodel_store import RModelStore
 from sorteddict import SortedDict
 import time
+
 
 def itime():
     return int(time.time())
 
+
 def to_dict(data):
     return eval(data)
+
 
 class EventDB(RModel):
 
@@ -17,23 +20,26 @@ class EventDB(RModel):
     params = rfield(to_dict)
 
     def set_data(self, event):
-        self.type = event.type
-        self.params = str(event.params)
+        self.type.set(event.type)
+        self.params.set(str(event.params))
+
 
 class EventQueueDB(RModelStore):
 
     assign = EventDB
 
+
 class ReactorDB(RModelStore):
 
     prefix = 'reactor'
+    root = True
 
     assign = EventQueueDB
 
     @property
     def event_models(self):
-        for key in self.keys:
-            yield int(key), list(self.get(key).models)
+        for model in self.models():
+            yield int(model.prefix), model.models()
 
     def dump(self, time, event):
         queue = self.get(time)
@@ -54,9 +60,9 @@ class Reactor(object):
     def load(self):
         for time, event_queue in self.db.event_models:
             for event_db in event_queue:
-                event = self.mapper.get(event_db.type)
+                event = self.mapper.get(event_db.type.get())
                 if event:
-                    self.get(time).append(event(**event_db.params))
+                    self.get(time).append(event(**event_db.params.get()))
 
     def flush(self):
         self.timeline = SortedDict()
@@ -72,7 +78,6 @@ class Reactor(object):
         self.get(time).append(event)
         self.db.dump(time, event)
         return time
-
 
     def wait_for_calc(self, time):
         done = False
