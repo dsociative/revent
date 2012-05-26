@@ -9,7 +9,7 @@ import threading
 class RThread(threading.Thread):
 
     def __init__(self, mapper={}):
-        super(TickerThread, self).__init__()
+        super(RThread, self).__init__()
         self.loop = pyev.default_loop()
         self.reactor = Reactor(mapper)
 
