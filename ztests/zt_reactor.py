@@ -80,4 +80,11 @@ class ReactorTest(TestCase):
 
         self.assertEqual(self.reactor.db.get(event_time), None)
 
+    def test_periodic(self):
+        event = TEevent()
+        self.assertEqual(event.done, False)
+        reactor = Reactor([], [event])
+        reactor.calc()
+        self.assertEqual(event.done, True)
+
 

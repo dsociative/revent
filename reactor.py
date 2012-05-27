@@ -52,10 +52,11 @@ class ReactorDB(RModelStore):
 
 class Reactor(object):
 
-    def __init__(self, events):
+    def __init__(self, events, periodics=[]):
         self.db = ReactorDB()
         self.mapper = dict(self.mapper_gen(events))
         self.timeline = SortedDict()
+        self.periodics = periodics
 
         self.load()
 
@@ -101,6 +102,9 @@ class Reactor(object):
 
     def calc(self, time=None):
         time = time or itime()
+
+        for event in self.periodics:
+            event.do(self, time)
 
         for expected_time, events in self.wait_for_calc(time):
             for event in events:
