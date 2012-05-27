@@ -2,6 +2,7 @@
 from fields.rfield import rfield
 from rmodel import RModel
 from rmodel_store import RModelStore
+from selector import Selector
 from sorteddict import SortedDict
 import time
 
@@ -10,14 +11,10 @@ def itime():
     return int(time.time())
 
 
-def to_dict(data):
-    return eval(data)
-
-
 class EventDB(RModel):
 
     type = rfield()
-    params = rfield(to_dict)
+    params = rfield(eval)
 
     def set_data(self, event):
         self.type.set(event.type)
@@ -52,11 +49,13 @@ class ReactorDB(RModelStore):
 
 class Reactor(object):
 
-    def __init__(self, events, periodics=[]):
+    def __init__(self, events, periodics=[], select=[]):
+        self.selector = Selector(select)
         self.db = ReactorDB()
         self.mapper = dict(self.mapper_gen(events))
-        self.timeline = SortedDict()
+
         self.periodics = periodics
+        self.timeline = SortedDict()
 
         self.load()
 
@@ -64,12 +63,15 @@ class Reactor(object):
         for event in events:
             yield event.type, event
 
+    def __getitem__(self, name):
+        return self.selector.get(name)
+
     def load(self):
         for time, event_queue in self.db.event_models:
             for event_db in event_queue:
                 event = self.mapper.get(event_db.type.get())
                 if event:
-                    self.get(time).append(event(**event_db.params.get()))
+                    self.append(event(**event_db.params.get()), time=time)
 
     def flush(self):
         self.timeline = SortedDict()
@@ -80,8 +82,10 @@ class Reactor(object):
             queue = self.timeline[time] = []
         return queue
 
-    def append(self, event, tdelta):
-        time = itime() + tdelta
+    def append(self, event, tdelta=None, time=None):
+        time = time or itime() + tdelta
+
+        self.selector.process(event)
         self.get(time).append(event)
         self.db.dump(time, event)
         return time
@@ -109,6 +113,7 @@ class Reactor(object):
         for expected_time, events in self.wait_for_calc(time):
             for event in events:
                 event.do(self, time)
+                self.selector.remove(event)
             self.remove_events(expected_time)
 
 

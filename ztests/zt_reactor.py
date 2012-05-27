@@ -87,4 +87,13 @@ class ReactorTest(TestCase):
         reactor.calc()
         self.assertEqual(event.done, True)
 
+    def test_remove(self):
+        reactor = Reactor([EventWithArgs], [], ['x'])
+        event = EventWithArgs(x=1, y=2)
+        reactor.append(event, 0)
+
+        self.assertEqual(reactor['x'][1], [event])
+        reactor.calc(itime() + 10)
+        self.assertEqual(reactor['x'], {})
+
 

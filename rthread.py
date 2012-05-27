@@ -8,10 +8,10 @@ import threading
 
 class RThread(threading.Thread):
 
-    def __init__(self, events, periodics):
+    def __init__(self, events, periodics, select):
         super(RThread, self).__init__()
         self.loop = pyev.default_loop()
-        self.reactor = Reactor(events, periodics)
+        self.reactor = Reactor(events, periodics, select)
 
     def run(self):
         def stopper_cb(watcher, events):
