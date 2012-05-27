@@ -53,6 +53,11 @@ class ReactorTest(TestCase):
         self.assertEqual(self.reactor.get(event_time), [])
         self.assertEqual(self.reactor.get(event_time2), [])
 
+    def test_mapper_gen(self):
+        mapper = dict(self.reactor.mapper_gen([EventWithArgs, TEevent]))
+        self.assertEqual(mapper['EventWithArgs'], EventWithArgs)
+        self.assertEqual(mapper['TEevent'], TEevent)
+
     def test_save_load(self):
         self.reactor.mapper['EventWithArgs'] = EventWithArgs
         event_time = itime() + 30
@@ -61,7 +66,7 @@ class ReactorTest(TestCase):
         self.reactor.append(event, 30)
 
         event_db = self.reactor.db.get(event_time).get(1)
-        self.assertEqual(event_db.type.get(), event.type)
+        self.assertEqual(event_db.type.get(), event.type())
         self.assertEqual(event_db.params.get(), event.params)
 
         self.reactor.timeline = SortedDict()

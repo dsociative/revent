@@ -17,7 +17,7 @@ class EventDB(RModel):
     params = rfield(eval)
 
     def set_data(self, event):
-        self.type.set(event.type)
+        self.type.set(event.type())
         self.params.set(str(event.params))
 
 
@@ -61,7 +61,7 @@ class Reactor(object):
 
     def mapper_gen(self, events):
         for event in events:
-            yield event.type, event
+            yield event.type(), event
 
     def __getitem__(self, name):
         return self.selector.get(name)
