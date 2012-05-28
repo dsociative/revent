@@ -10,7 +10,7 @@ class SelectList(list):
         self.mapper = defaultdict(list)
 
     def append(self, item):
-        self.mapper[item.type].append(item)
+        self.mapper[item.type()].append(item)
         return list.append(self, item)
 
     def __getitem__(self, name):

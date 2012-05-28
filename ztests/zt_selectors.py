@@ -1,7 +1,7 @@
 # coding: utf8
 
 from event import Event
-from selector import Selector
+from selector import Selector, SelectList
 from unittest.case import TestCase
 
 
@@ -71,3 +71,12 @@ class SelectorsTest(TestCase):
         self.assertEqual(select_list['1']['TEvent1'], [events[0]])
         self.assertEqual(select_list['1']['TEvent2'], [events[2]])
         self.assertEqual(select_list['1'][0:1], [events[0]])
+
+
+class SelectListTest(TestCase):
+
+    def test_append(self):
+        event = TEvent1(uid='1')
+        slist = SelectList()
+        slist.append(event)
+        self.assertEqual(slist['TEvent1'], [event])
