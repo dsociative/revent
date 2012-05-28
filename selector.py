@@ -46,6 +46,10 @@ class Selector(object):
             if value:
                 yield key, value
 
+    def clear(self):
+        self.events = []
+        self.store.clear()
+
     def process(self, event):
         if self.has_entry(event.params):
             self.events.append(event)

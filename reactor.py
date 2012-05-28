@@ -74,7 +74,8 @@ class Reactor(object):
                     self.append(event(**event_db.params.get()), time=time)
 
     def flush(self):
-        self.timeline = SortedDict()
+        self.timeline.clear()
+        self.selector.clear()
 
     def get(self, time):
         queue = self.timeline.get(time)

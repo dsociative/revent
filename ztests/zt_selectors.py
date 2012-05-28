@@ -20,8 +20,12 @@ class SelectorsTest(TestCase):
 
     def setUp(self):
         TestCase.setUp(self)
-
         self.selector = Selector([])
+
+        self.selector = Selector(['uid', 'pid'])
+        self.events = [TEvent1(uid='1'), TEvent1(uid='2'), TEvent2(uid='1')]
+        for e in self.events:
+            self.selector.process(e)
 
     def test_entry(self):
         selector = Selector(['uid', 'pid'])
@@ -39,38 +43,39 @@ class SelectorsTest(TestCase):
         self.assertFalse(selector.has_entry({'id': 2}))
 
     def test_build(self):
-        self.assertEqual(self.selector.get('uid'), {})
+        selector = Selector([])
+        self.assertEqual(selector.get('uid'), {})
         events = [TEvent1(uid='1'), TEvent1(uid='2'), TEvent1(other_kw=True)]
 
         for e in events:
             self.selector.process(e)
 
-        self.assertEqual(self.selector.get('uid'), {})
+        self.assertEqual(selector.get('uid'), {})
 
-        self.selector = Selector(['uid'])
-        for e in events:
-            self.selector.process(e)
-
-        self.assertTrue(events[0] in self.selector.events)
-        self.assertTrue(events[1] in self.selector.events)
-        self.assertEqual(self.selector.get('uid'), {'1': [events[0]],
-                                                    '2': [events[1]]})
-
-        self.selector.remove(events[0])
-        self.assertEqual(self.selector.events, [events[1]])
-        self.assertEqual(self.selector.get('uid'), {'2': [events[1]]})
-
-    def test_select_list(self):
-        selector = Selector(['uid', 'pid'])
-        events = [TEvent1(uid='1'), TEvent1(uid='2'), TEvent2(uid='1')]
+        selector = Selector(['uid'])
         for e in events:
             selector.process(e)
 
-        select_list = selector.get('uid')
-        self.assertEqual(select_list['1'], [events[0], events[2]])
-        self.assertEqual(select_list['1']['TEvent1'], [events[0]])
-        self.assertEqual(select_list['1']['TEvent2'], [events[2]])
-        self.assertEqual(select_list['1'][0:1], [events[0]])
+        self.assertTrue(events[0] in selector.events)
+        self.assertTrue(events[1] in selector.events)
+        self.assertEqual(selector.get('uid'), {'1': [events[0]],
+                                               '2': [events[1]]})
+
+        selector.remove(events[0])
+        self.assertEqual(selector.events, [events[1]])
+        self.assertEqual(selector.get('uid'), {'2': [events[1]]})
+
+    def test_select_list(self):
+        select_list = self.selector.get('uid')
+        self.assertEqual(select_list['1'], [self.events[0], self.events[2]])
+        self.assertEqual(select_list['1']['TEvent1'], [self.events[0]])
+        self.assertEqual(select_list['1']['TEvent2'], [self.events[2]])
+        self.assertEqual(select_list['1'][0:1], [self.events[0]])
+
+    def test_clear(self):
+        self.selector.clear()
+        self.assertEqual(self.selector.events, [])
+        self.assertEqual(self.selector.get('uid'), {})
 
 
 class SelectListTest(TestCase):
