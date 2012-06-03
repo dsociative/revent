@@ -59,6 +59,9 @@ class Reactor(object):
 
         self.load()
 
+    def time(self):
+        return itime()
+
     def mapper_gen(self, events):
         for event in events:
             yield event.type(), event
@@ -84,7 +87,7 @@ class Reactor(object):
         return queue
 
     def append(self, event, tdelta=None, time=None):
-        time = time or itime() + tdelta
+        time = time or self.time() + tdelta
 
         self.selector.process(event)
         self.get(time).append(event)
@@ -106,7 +109,7 @@ class Reactor(object):
         self.db.remove_item(time)
 
     def calc(self, time=None):
-        time = time or itime()
+        time = time or self.time()
 
         for event in self.periodics:
             event.do(self, time)
