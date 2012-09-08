@@ -1,7 +1,7 @@
 # coding: utf8
-from fields.rfield import rfield
-from rmodel import RModel
-from rmodel_store import RModelStore
+from rmodel.fields.rfield import rfield
+from rmodel.models.rstore import RStore
+from rmodel.models.runit import RUnit
 from selector import Selector
 from sorteddict import SortedDict
 import time
@@ -11,7 +11,7 @@ def itime():
     return int(time.time())
 
 
-class EventDB(RModel):
+class EventDB(RUnit):
 
     type = rfield()
     params = rfield(eval)
@@ -21,12 +21,12 @@ class EventDB(RModel):
         self.params.set(str(event.params))
 
 
-class EventQueueDB(RModelStore):
+class EventQueueDB(RStore):
 
     assign = EventDB
 
 
-class ReactorDB(RModelStore):
+class ReactorDB(RStore):
 
     prefix = 'reactor'
     root = True
