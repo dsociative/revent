@@ -1,6 +1,5 @@
 # coding: utf8
 
-from reactor import Reactor
 from signal import SIGINT
 import pyev
 import threading
@@ -8,16 +7,17 @@ import threading
 
 class RThread(threading.Thread):
 
-    def __init__(self, events, periodics, select):
+    def __init__(self, reactor):
         super(RThread, self).__init__()
         self.loop = pyev.default_loop()
-        self.reactor = Reactor(events, periodics, select)
+        self.reactor = reactor
 
     def run(self):
         def stopper_cb(watcher, events):
             watcher.loop.stop()
 
         def timer_cb(watcher, events):
+            print watcher, events
             self.reactor.calc()
 
         timer = pyev.Timer(0, 1, self.loop, timer_cb, 0)
