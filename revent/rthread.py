@@ -17,7 +17,6 @@ class RThread(threading.Thread):
             watcher.loop.stop()
 
         def timer_cb(watcher, events):
-            print watcher, events
             self.reactor.calc()
 
         timer = pyev.Timer(0, 1, self.loop, timer_cb, 0)

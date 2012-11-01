@@ -2,3 +2,7 @@
 .project
 .pydevproject
 .settings
+env
+.*
+*.egg-info
+build

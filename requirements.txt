@@ -1,4 +1,3 @@
 redis
 unittest2
-teamcity-messages
-git+https://github.com/dsociative/rmodel.git@changes
+git+https://github.com/dsociative/rmodel.git@db_connection

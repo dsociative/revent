@@ -1,8 +1,11 @@
 # coding: utf8
-from event import Event
-from reactor import Reactor, itime
-from sorteddict import SortedDict
 from unittest.case import TestCase
+
+from redis import Redis
+
+from revent.event import Event
+from revent.reactor import Reactor, itime
+from revent.sorteddict import SortedDict
 
 
 class TEevent(Event):
@@ -24,7 +27,7 @@ class EventWithArgs(Event):
 class ReactorTest(TestCase):
 
     def setUp(self):
-        self.reactor = Reactor([])
+        self.reactor = Reactor(Redis(), [])
         self.reactor.db.remove()
 
     def test_(self):
@@ -88,12 +91,12 @@ class ReactorTest(TestCase):
     def test_periodic(self):
         event = TEevent()
         self.assertEqual(event.done, False)
-        reactor = Reactor([], [event])
+        reactor = Reactor(Redis(), [], [event])
         reactor.calc()
         self.assertEqual(event.done, True)
 
     def test_remove(self):
-        reactor = Reactor([EventWithArgs], [], ['x'])
+        reactor = Reactor(Redis(), [EventWithArgs], [], ['x'])
         event = EventWithArgs(x=1, y=2)
         reactor.append(event, 0)
 

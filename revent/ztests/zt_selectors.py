@@ -1,7 +1,7 @@
 # coding: utf8
 
-from event import Event
-from selector import Selector, SelectList
+from revent.event import Event
+from revent.selector import Selector, SelectList
 from unittest.case import TestCase
 
 

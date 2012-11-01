@@ -49,9 +49,9 @@ class ReactorDB(RStore):
 
 class Reactor(object):
 
-    def __init__(self, events, periodics=[], select=[]):
+    def __init__(self, redis, events, periodics=[], select=[]):
         self.selector = Selector(select)
-        self.db = ReactorDB()
+        self.db = ReactorDB(redis)
         self.mapper = dict(self.mapper_gen(events))
 
         self.periodics = periodics
