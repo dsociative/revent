@@ -1,4 +1,5 @@
 # coding: utf8
+import traceback
 from rmodel.fields.rfield import rfield
 from rmodel.models.rstore import RStore
 from rmodel.models.runit import RUnit
@@ -119,5 +120,11 @@ class Reactor(object):
                 event.do(self, time)
                 self.selector.remove(event)
             self.remove_events(expected_time)
+
+    def try_calc(self):
+        try:
+            self.calc()
+        except:
+            return  traceback.format_exc()
 
 

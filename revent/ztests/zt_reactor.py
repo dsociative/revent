@@ -24,11 +24,18 @@ class EventWithArgs(Event):
         self.y = y
 
 
+class ErrorEvent(Event):
+
+    def do(self, reactor, time):
+        error
+
+
 class ReactorTest(TestCase):
 
     def setUp(self):
-        self.reactor = Reactor(Redis(), [])
-        self.reactor.db.remove()
+        redis = Redis()
+        redis.flushdb()
+        self.reactor = Reactor(redis, [])
 
     def test_(self):
         self.assertEqual(self.reactor.get(itime()), [])
@@ -103,5 +110,10 @@ class ReactorTest(TestCase):
         self.assertEqual(reactor['x'][1], [event])
         reactor.calc(itime() + 10)
         self.assertEqual(reactor['x'], {})
+
+    def test_try_calc(self):
+        event = ErrorEvent()
+        self.reactor.append(event, time=1)
+        self.assertIn('Traceback', self.reactor.try_calc())
 
 

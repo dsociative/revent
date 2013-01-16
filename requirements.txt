@@ -1,3 +1,3 @@
 redis
 unittest2
-git+https://github.com/dsociative/rmodel.git@db_connection
+git+https://github.com/dsociative/rmodel.git@staging
