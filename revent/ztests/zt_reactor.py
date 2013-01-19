@@ -1,5 +1,7 @@
 # coding: utf8
+from StringIO import StringIO
 from unittest.case import TestCase
+import sys
 
 from redis import Redis
 
@@ -112,8 +114,10 @@ class ReactorTest(TestCase):
         self.assertEqual(reactor['x'], {})
 
     def test_try_calc(self):
+        sys.stderr = StringIO()
         event = ErrorEvent()
         self.reactor.append(event, time=1)
-        self.assertIn('Traceback', self.reactor.try_calc())
+        self.reactor.try_calc()
+        self.assertIn('Traceback', sys.stderr.getvalue())
 
 

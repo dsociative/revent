@@ -125,6 +125,6 @@ class Reactor(object):
         try:
             self.calc()
         except:
-            return  traceback.format_exc()
+            return  traceback.print_exc()
 
 
