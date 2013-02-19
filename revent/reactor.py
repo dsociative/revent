@@ -70,12 +70,16 @@ class Reactor(object):
     def __getitem__(self, name):
         return self.selector.get(name)
 
+    def add_to_queue(self, event, time):
+        self.selector.process(event)
+        self.get(time).append(event)
+
     def load(self):
         for time, event_queue in self.db.event_models:
             for event_db in event_queue:
                 event = self.mapper.get(event_db.type.get())
                 if event:
-                    self.append(event(**event_db.params.get()), time=time)
+                    self.add_to_queue(event(**event_db.params.get()), time=time)
 
     def flush(self):
         self.timeline.clear()
@@ -89,9 +93,7 @@ class Reactor(object):
 
     def append(self, event, tdelta=None, time=None):
         time = time or self.time() + tdelta
-
-        self.selector.process(event)
-        self.get(time).append(event)
+        self.add_to_queue(event, time)
         self.db.dump(time, event)
         return time
 
@@ -125,6 +127,6 @@ class Reactor(object):
         try:
             self.calc()
         except:
-            return  traceback.print_exc()
+            return traceback.print_exc()
 
 

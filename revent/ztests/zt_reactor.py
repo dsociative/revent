@@ -29,7 +29,7 @@ class EventWithArgs(Event):
 class ErrorEvent(Event):
 
     def do(self, reactor, time):
-        error
+        raise Exception('error')
 
 
 class ReactorTest(TestCase):
@@ -39,13 +39,15 @@ class ReactorTest(TestCase):
         redis.flushdb()
         self.reactor = Reactor(redis, [])
 
-    def test_(self):
+    def test_append(self):
         self.assertEqual(self.reactor.get(itime()), [])
         event = TEevent()
         self.reactor.append(event, 30)
 
         event_time = itime() + 30
         self.assertEqual(self.reactor.get(event_time), [event])
+        self.assertEqual(self.reactor.db.get(event_time).data(),
+                         {'1': {'params': {}, 'type': 'TEevent'}})
 
         self.reactor.calc(event_time)
         self.assertEqual(self.reactor.get(event_time), [])
@@ -77,9 +79,11 @@ class ReactorTest(TestCase):
         self.reactor.append(event, 30)
         self.reactor.append(event, 30)
 
-        event_db = self.reactor.db.get(event_time).get(1)
+        queue = self.reactor.db.get(event_time)
+        event_db = queue.get(1)
         self.assertEqual(event_db.type.get(), event.type())
         self.assertEqual(event_db.params.get(), event.params)
+        self.assertEqual(len(queue), 2)
 
         self.reactor.timeline = SortedDict()
         self.reactor.load()
@@ -92,10 +96,10 @@ class ReactorTest(TestCase):
         self.assertIsInstance(event2, EventWithArgs)
         self.assertEqual(event2.x, 10)
         self.assertEqual(event2.y, 15)
+        self.assertEqual(len(queue), 2)
 
         self.reactor.calc(event_time)
-
-        self.assertEqual(self.reactor.db.get(event_time), None)
+        self.assertEqual(queue.get(event_time), None)
 
     def test_periodic(self):
         event = TEevent()
