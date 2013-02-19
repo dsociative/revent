@@ -1,5 +1,5 @@
 # coding: utf8
-import traceback
+import logging
 from rmodel.fields.rfield import rfield
 from rmodel.models.rstore import RStore
 from rmodel.models.runit import RUnit
@@ -51,6 +51,7 @@ class ReactorDB(RStore):
 class Reactor(object):
 
     def __init__(self, redis, events, periodics=[], select=[]):
+        self.logger = logging.getLogger('reactor')
         self.selector = Selector(select)
         self.db = ReactorDB(redis)
         self.mapper = dict(self.mapper_gen(events))
@@ -111,22 +112,21 @@ class Reactor(object):
             del self.timeline[time]
         self.db.remove_item(time)
 
+    def execute(self, event, time):
+        try:
+            event.do(self, time)
+        except Exception:
+            self.logger.error('%s executing at %s' % (event, time), exc_info=1)
+
     def calc(self, time=None):
         time = time or self.time()
 
         for event in self.periodics:
-            event.do(self, time)
+            self.execute(event, time)
 
         for expected_time, events in self.wait_for_calc(time):
             for event in events:
-                event.do(self, time)
+                self.execute(event, time)
                 self.selector.remove(event)
             self.remove_events(expected_time)
-
-    def try_calc(self):
-        try:
-            self.calc()
-        except:
-            return traceback.print_exc()
-
 

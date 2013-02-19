@@ -1,5 +1,6 @@
 # coding: utf8
 from StringIO import StringIO
+import logging
 from unittest.case import TestCase
 import sys
 
@@ -32,12 +33,16 @@ class ErrorEvent(Event):
         raise Exception('error')
 
 
+
 class ReactorTest(TestCase):
 
     def setUp(self):
         redis = Redis()
         redis.flushdb()
         self.reactor = Reactor(redis, [])
+        self.errors = StringIO()
+        self.reactor.logger.addHandler(logging.StreamHandler(self.errors))
+
 
     def test_append(self):
         self.assertEqual(self.reactor.get(itime()), [])
@@ -118,10 +123,19 @@ class ReactorTest(TestCase):
         self.assertEqual(reactor['x'], {})
 
     def test_try_calc(self):
-        sys.stderr = StringIO()
+        time = self.reactor.time()
         event = ErrorEvent()
         self.reactor.append(event, time=1)
-        self.reactor.try_calc()
-        self.assertIn('Traceback', sys.stderr.getvalue())
+        self.reactor.calc()
+        self.assertIn(
+            '<ErrorEvent:{}> executing at %s' % time,
+            self.errors.getvalue()
+        )
 
-
+    def test_execute(self):
+        event = ErrorEvent()
+        self.reactor.execute(event, time=500)
+        self.assertIn(
+            '<ErrorEvent:{}> executing at 500',
+            self.errors.getvalue()
+        )
