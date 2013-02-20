@@ -16,3 +16,6 @@ class Event(object):
 
     def do(self, reactor, time):
         ''' override '''
+
+    def __repr__(self):
+        return '<%s:%s>' % (self.type(), self.params)
