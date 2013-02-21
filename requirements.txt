@@ -1,4 +1,0 @@
-redis
-unittest2
-teamcity-messages
-git+https://github.com/dsociative/rmodel.git@changes

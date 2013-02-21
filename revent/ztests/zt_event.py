@@ -1,6 +1,6 @@
 # coding: utf8
 
-from event import Event
+from revent.event import Event
 from unittest.case import TestCase
 
 

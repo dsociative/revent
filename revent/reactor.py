@@ -1,4 +1,5 @@
 # coding: utf8
+import logging
 from rmodel.fields.rfield import rfield
 from rmodel.models.rstore import RStore
 from rmodel.models.runit import RUnit
@@ -49,9 +50,10 @@ class ReactorDB(RStore):
 
 class Reactor(object):
 
-    def __init__(self, events, periodics=[], select=[]):
+    def __init__(self, redis, events, periodics=[], select=[]):
+        self.logger = logging.getLogger('reactor')
         self.selector = Selector(select)
-        self.db = ReactorDB()
+        self.db = ReactorDB(redis)
         self.mapper = dict(self.mapper_gen(events))
 
         self.periodics = periodics
@@ -69,12 +71,16 @@ class Reactor(object):
     def __getitem__(self, name):
         return self.selector.get(name)
 
+    def add_to_queue(self, event, time):
+        self.selector.process(event)
+        self.get(time).append(event)
+
     def load(self):
         for time, event_queue in self.db.event_models:
             for event_db in event_queue:
                 event = self.mapper.get(event_db.type.get())
                 if event:
-                    self.append(event(**event_db.params.get()), time=time)
+                    self.add_to_queue(event(**event_db.params.get()), time=time)
 
     def flush(self):
         self.timeline.clear()
@@ -88,9 +94,7 @@ class Reactor(object):
 
     def append(self, event, tdelta=None, time=None):
         time = time or self.time() + tdelta
-
-        self.selector.process(event)
-        self.get(time).append(event)
+        self.add_to_queue(event, time)
         self.db.dump(time, event)
         return time
 
@@ -108,16 +112,21 @@ class Reactor(object):
             del self.timeline[time]
         self.db.remove_item(time)
 
+    def execute(self, event, time):
+        try:
+            event.do(self, time)
+        except Exception:
+            self.logger.error('%s executing at %s' % (event, time), exc_info=1)
+
     def calc(self, time=None):
         time = time or self.time()
 
         for event in self.periodics:
-            event.do(self, time)
+            self.execute(event, time)
 
         for expected_time, events in self.wait_for_calc(time):
             for event in events:
-                event.do(self, time)
+                self.execute(event, time)
                 self.selector.remove(event)
             self.remove_events(expected_time)
-
 
