@@ -10,10 +10,10 @@ setup(name='revent',
       packages=['revent'],
       dependency_links=[
           "http://github.com/dsociative/rmodel/tarball/master#egg=rmodel-0.0.0",
+          "http://github.com/dsociative/ztest/tarball/master#egg=ztest-0.0.0",
       ],
       install_requires=[
           'redis',
-          'pyev',
           'rmodel',
           'unittest2'
       ]
