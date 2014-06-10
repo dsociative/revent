@@ -1,6 +1,7 @@
 # coding: utf8
 
 import threading
+import time
 
 
 class RThread(threading.Thread):
@@ -12,6 +13,7 @@ class RThread(threading.Thread):
 
     def run(self):
         while self.status:
+            time.sleep(1)
             self.reactor.calc()
 
     def stop(self):
